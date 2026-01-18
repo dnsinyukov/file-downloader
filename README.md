@@ -16,7 +16,7 @@ A professional PHP library for downloading files with support for HTTP, HTTPS, F
 ## Installation
 
 ```bash
-composer require codeden/file-downloader
+composer require coderden/file-downloader
 ```
 
 ## Quick Start
