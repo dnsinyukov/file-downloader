@@ -1,0 +1,18 @@
+{
+    "name": "coderden/file-downloader",
+    "description": "Professional file downloader package for PHP with helper functions",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "CoderDen\\FileDownloader\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.0",
+        "ext-ftp": "*",
+        "ext-fileinfo": "*",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "minimum-stability": "dev"
+}
