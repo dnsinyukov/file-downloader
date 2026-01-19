@@ -50,7 +50,7 @@ class DownloadBuilder
         return $this;
     }
 
-    public function download(): array
+    public function download(?string $fileName = null): array
     {
         if (empty($this->sources)) {
             throw new \InvalidArgumentException("No sources specified");
@@ -63,6 +63,7 @@ class DownloadBuilder
         return $this->manager->download(
             $this->sources,
             $this->destination,
+            $fileName,
             $this->options
         );
     }

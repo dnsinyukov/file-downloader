@@ -1,5 +1,7 @@
 <?php
 
+namespace CoderDen\FileDownloader;
+
 use CoderDen\FileDownloader\DownloadBuilder;
 use CoderDen\FileDownloader\FileDownloadManager;
 
@@ -44,7 +46,7 @@ class FileDownloadHelper
     /**
      * Quick download single file
      */
-    public static function download(string $url, ?string $destination = null): array
+    public static function download(string $url, ?string $destination = null, ?string $fileName = null): array
     {
         $destination = $destination ?: self::$config['default_destination'];
         
@@ -52,13 +54,13 @@ class FileDownloadHelper
             ->from($url)
             ->to($destination)
             ->withOptions(self::$config)
-            ->download();
+            ->download($fileName);
     }
 
     /**
      * Download multiple files
      */
-    public static function downloadMultiple(array $urls, ?string $destination = null): array
+    public static function downloadMultiple(array $urls, ?string $destination = null, ?string $fileName = null): array
     {
         $destination = $destination ?: self::$config['default_destination'];
         
@@ -66,23 +68,24 @@ class FileDownloadHelper
             ->from($urls)
             ->to($destination)
             ->withOptions(self::$config)
-            ->download();
+            ->download($fileName);
     }
 
      /**
      * Download with retry logic
      */
     public static function downloadWithRetry(
-        string $url, 
+        string $url,
         ?string $destination = null, 
-        ?int $maxRetries = null
+        ?string $fileName = null,
+        ?int $maxRetries = null,
     ): array {
         $maxRetries = $maxRetries ?: self::$config['max_retries'];
         $attempt = 0;
         
         while ($attempt < $maxRetries) {
             try {
-                return self::download($url, $destination);
+                return self::download($url, $destination, $fileName);
             } catch (\Exception $e) {
                 $attempt++;
                 if ($attempt === $maxRetries) {
@@ -101,6 +104,7 @@ class FileDownloadHelper
     public static function downloadLargeFile(
         string $url, 
         string $destination,
+        ?string $fileName = null,
         int $chunkSize = 1048576
     ): array {
         return (new DownloadBuilder(self::getManager()))
@@ -108,7 +112,7 @@ class FileDownloadHelper
             ->to($destination)
             ->chunked(true)
             ->chunkSize($chunkSize)
-            ->download();
+            ->download($fileName);
     }
 
     /**
@@ -117,6 +121,7 @@ class FileDownloadHelper
     public static function downloadViaFtp(
         string $ftpUrl,
         string $destination,
+        ?string $fileName = null,
         array $ftpOptions = []
     ): array {
         $options = array_merge(self::$config, [
@@ -129,7 +134,7 @@ class FileDownloadHelper
             ->from($ftpUrl)
             ->to($destination)
             ->withOptions($options)
-            ->download();
+            ->download($fileName);
     }
 
     /**
@@ -137,9 +142,10 @@ class FileDownloadHelper
      */
     public static function downloadImage(
         string $imageUrl, 
-        ?string $destination = null
+        ?string $destination = null,
+        ?string $fileName = null,
     ): array {
-        $result = self::download($imageUrl, $destination);
+        $result = self::download($imageUrl, $destination, $fileName);
         
         if ($result[0]['success'] ?? false) {
             $filePath = $result[0]['destination'];
@@ -227,7 +233,8 @@ class FileDownloadHelper
     public static function downloadWithHeaders(
         string $url,
         string $destination,
-        array $headers
+        array $headers,
+        ?string $fileName = null,
     ): array {
         $options = array_merge(self::$config, [
             'headers' => $headers,
@@ -237,7 +244,7 @@ class FileDownloadHelper
             ->from($url)
             ->to($destination)
             ->withOptions($options)
-            ->download();
+            ->download($fileName);
     }
 
     /**
@@ -265,6 +272,7 @@ class FileDownloadHelper
     public static function batchDownload(
         array $urls, 
         string $destinationDir,
+        string $fileNames,
         int $concurrency = 3
     ): array {
         $results = [];
@@ -273,8 +281,8 @@ class FileDownloadHelper
         foreach ($chunks as $chunk) {
             $promises = [];
             
-            foreach ($chunk as $url) {
-                $results[] = self::download($url, $destinationDir);
+            foreach ($chunk as $key => $url) {
+                $results[] = self::download($url, $destinationDir, $fileNames[$key] ?? null);
             }
         }
         

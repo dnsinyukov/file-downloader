@@ -29,6 +29,7 @@ class FileDownloadManager
     public function download(
         string|array $sources, 
         string $destinationDir, 
+        ?string $fileName = null,
         array $options = []
     ): array
     {
